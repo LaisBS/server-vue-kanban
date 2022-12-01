@@ -1,5 +1,7 @@
 "use strict";
 
+const Database = use("Database");
+
 /** @typedef {import('@adonisjs/framework/src/Request')} Request */
 /** @typedef {import('@adonisjs/framework/src/Response')} Response */
 /** @typedef {import('@adonisjs/framework/src/View')} View */
@@ -34,8 +36,19 @@ class LeadController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async store({ request, auth }) {
+  async store({ request, response, auth }) {
     const { name, email, phone, status } = request.all();
+
+    const emailAlreadyExists = await Database.table("leads").where(
+      "email",
+      email
+    );
+    console.log(emailAlreadyExists);
+
+    if (emailAlreadyExists.length > 0) {
+      return response.status(400).json({ message: "Email already exists" });
+    }
+
     const lead = await Lead.create({
       user_id: auth.user.id,
       name: name,
@@ -66,9 +79,11 @@ class LeadController {
       status: status,
     });
 
-    await lead.save;
+    await lead.save();
 
-    return lead;
+    const leadUpdated = await Lead.findOrFail(params.id);
+
+    return leadUpdated;
   }
 
   /**
