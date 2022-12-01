@@ -43,7 +43,6 @@ class LeadController {
       "email",
       email
     );
-    console.log(emailAlreadyExists);
 
     if (emailAlreadyExists.length > 0) {
       return response.status(400).json({ message: "Email already exists" });
